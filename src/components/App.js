@@ -6,6 +6,7 @@ import Cart from "./Cart/Cart"
 import Products from "./Shop/Products"
 import { uiActions } from "../store/ui-slice"
 import Notification from "./UI/Notification"
+import { cartActions } from "../store/cart-slice"
 
 let isInitial = true
 
@@ -39,6 +40,23 @@ const App = () => {
             dispatch(uiActions.showNotification({status: "error", title: "Error", message: "Sending cart data is failed"}))
         })
     }, [cart, dispatch])
+    
+    useEffect(() => {
+        const fetchCartData = async() => {
+            const response = await fetch("https://shopping-cart-acead-default-rtdb.firebaseio.com/cart.json")
+    
+            if(!response.ok) {
+                throw new Error("Fetching cart data is failed")
+            }
+    
+            const data = await response.json()
+            dispatch(cartActions.replaceCart({items: data.items || [], totalQuantity: data.totalQuantity}))
+        }
+    
+        fetchCartData().catch((error) => {
+            dispatch(uiActions.showNotification({status: "error", title: "Error", message: "Fetching cart data is failed"}))
+        })
+    }, [dispatch])
     
     return(
         <Fragment>
